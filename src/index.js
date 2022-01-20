@@ -12,7 +12,8 @@ import {
   Dimensions,
   TouchableOpacity,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  I18nManager
 } from 'react-native'
 
 /**
@@ -94,6 +95,9 @@ const styles = {
   }
 }
 
+const isRTL = I18nManager.isRTL;
+const isAndroid = Platform.OS === 'android';
+const autoplayDirection = isAndroid ? !isRTL : true;
 // missing `module.exports = exports['default'];` with babel6
 // export default React.createClass({
 export default class extends Component {
@@ -172,7 +176,7 @@ export default class extends Component {
     loadMinimalSize: 1,
     autoplay: false,
     autoplayTimeout: 2.5,
-    autoplayDirection: true,
+    autoplayDirection: autoplayDirection,
     index: 0,
     onIndexChanged: () => null
   }
@@ -257,9 +261,13 @@ export default class extends Component {
     if (state.total === initState.total && !updateIndex) {
       // retain the index
       initState.index = state.index
-    } else {
-      initState.index =
-        initState.total > 1 ? Math.min(props.index, initState.total - 1) : 0
+     } else {
+      if(isRTL && isAndroid) {
+       initState.index = initState.total - 1;
+      }else{
+       initState.index =
+       initState.total > 1 ? Math.min(props.index, initState.total - 1) : 0
+      }
     }
 
     // Default: horizontal
@@ -669,13 +677,25 @@ export default class extends Component {
         ]}
       />
     )
-    for (let i = 0; i < this.state.total; i++) {
-      dots.push(
-        i === this.state.index
-          ? React.cloneElement(ActiveDot, { key: i })
-          : React.cloneElement(Dot, { key: i })
-      )
-    }
+
+    if(isAndroid && isRTL){
+      console.log("TEST");
+        for (let i = this.state.total-1; i >= 0; i--) {
+          dots.push(
+            i === this.state.index
+              ? React.cloneElement(ActiveDot, { key: i })
+              : React.cloneElement(Dot, { key: i })
+          )
+        }
+      }else{
+        for (let i = 0; i < this.state.total; i++) {
+          dots.push(
+            i === this.state.index
+              ? React.cloneElement(ActiveDot, { key: i })
+              : React.cloneElement(Dot, { key: i })
+          )
+        }
+      }
 
     return (
       <View
