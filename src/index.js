@@ -12,7 +12,8 @@ import {
   Dimensions,
   TouchableOpacity,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  I18nManager,
 } from 'react-native'
 
 /**
@@ -48,7 +49,12 @@ const styles = {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    ...Platform.select({
+      android: {
+        flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row'
+      }
+    })
   },
 
   pagination_y: {
@@ -85,7 +91,12 @@ const styles = {
     paddingHorizontal: 10,
     paddingVertical: 10,
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    ...Platform.select({
+      android: {
+        flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row'
+      }
+    })
   },
 
   buttonText: {
@@ -258,8 +269,11 @@ export default class extends Component {
       // retain the index
       initState.index = state.index
     } else {
-      initState.index =
-        initState.total > 1 ? Math.min(props.index, initState.total - 1) : 0
+      if (Platform.OS === 'android' && I18nManager.isRTL) {
+        initState.index = initState.total > 1 ? Math.max(props.index, initState.total - 1) : 0
+      } else {
+        initState.index = initState.total > 1 ? Math.min(props.index, initState.total - 1) : 0
+      }
     }
 
     // Default: horizontal
@@ -704,7 +718,7 @@ export default class extends Component {
     let button = null
 
     if (this.props.loop || this.state.index !== this.state.total - 1) {
-      button = this.props.nextButton || <Text style={styles.buttonText}>›</Text>
+      button = this.props.nextButton || <Text style={styles.buttonText}>{Platform.OS !== 'android' && I18nManager.isRTL ? '‹' : '›'}</Text>
     }
 
     return (
@@ -721,7 +735,7 @@ export default class extends Component {
     let button = null
 
     if (this.props.loop || this.state.index !== 0) {
-      button = this.props.prevButton || <Text style={styles.buttonText}>‹</Text>
+      button = this.props.prevButton || <Text style={styles.buttonText}>{Platform.OS !== 'android' && I18nManager.isRTL !== 'android' ? '›' : '‹'}</Text>
     }
 
     return (
@@ -781,7 +795,8 @@ export default class extends Component {
         onScrollEndDrag={this.onScrollEndDrag}
         style={this.props.scrollViewStyle}
       >
-        {pages}
+        
+        {Platform.OS='ios' ? pages : I18nManager.isRTL ? pages.reverse() : pages}
       </ScrollView>
     )
   }
