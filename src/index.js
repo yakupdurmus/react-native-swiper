@@ -796,7 +796,7 @@ export default class extends Component {
         style={this.props.scrollViewStyle}
       >
         
-        {Platform.OS='ios' ? pages : I18nManager.isRTL ? pages.reverse() : pages}
+        {Platform.OS == 'ios' ? pages : I18nManager.isRTL ? pages.reverse() : pages}
       </ScrollView>
     )
   }
