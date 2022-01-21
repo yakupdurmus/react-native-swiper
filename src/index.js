@@ -679,7 +679,6 @@ export default class extends Component {
     )
 
     if(isAndroid && isRTL){
-      console.log("TEST");
         for (let i = this.state.total-1; i >= 0; i--) {
           dots.push(
             i === this.state.index
